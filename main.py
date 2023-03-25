@@ -84,7 +84,7 @@ def mainModel(context):
   def tokenize_sent(text):
     sentences = [sent_tokenize(text)] ## sent_tokenize already ek list deta hai to yaha par 2d list ban ja rhi hai
     sentences = [y for x in sentences for y in x] 
-    sentences = [sentence.strip() for sentence in sentences if len(sentence) > 12]  ##remove sentences with length less than 20
+    sentences = [sentence.strip() for sentence in sentences if len(sentence) > 12]  ##remove sentences with length less than ~
     return sentences
 
   def get_keyword_sentences(keywords, sentences):
@@ -237,16 +237,13 @@ def video_conetext(video_id):
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/api",methods=['POST','GET'])
+@app.route("/api/vid",methods=['POST','GET'])
 
-def api():
+def vid():
     if request.method=='POST':
         input_json = request.get_json()
         print(request.content_type)
         print(input_json['url'])
-        #vurl=request.values.get('url')
-        # print(vurl)
-        # url=request.form['url']
         url=input_json['url']
         parsed_url=urlparse(url)
         video_id=parse_qs(parsed_url.query)['v'][0]
@@ -257,12 +254,48 @@ def api():
         print("\n",p_context)
         questions= mainModel(p_context)
         return jsonify(questions)
-        #return jsonify({'Success':'100'})
+
     
     if request.method=='GET':
         print("get success")
-        return jsonify({'Success':'100'})
+        return jsonify({'Success':'200'})
+    
+@app.route("/api/summ",methods=['POST','GET'])
 
+def summ():
+    if request.method=='POST':
+        input_json = request.get_json()
+        print(request.content_type)
+        print(input_json['url'])
+        url=input_json['url']
+        parsed_url=urlparse(url)
+        video_id=parse_qs(parsed_url.query)['v'][0]
+        print(video_id)
+        context=video_conetext(video_id)
+        print(context)
+        p_context=apply_te(context,lan='en')
+        return jsonify({'summary':p_context})
+
+    
+    if request.method=='GET':
+        print("get success")
+        return jsonify({'Success':'200'})
+    
+@app.route("/api/ques",methods=['POST','GET'])
+
+def ques():
+    if request.method=='POST':
+        input_json = request.get_json()
+        print(request.content_type)
+        print(input_json['url'])
+        url=input_json['url']
+        p_context=apply_te(url,lan='en')
+        questions= mainModel(p_context)
+        return jsonify(questions)
+    
+    if request.method=='GET':
+        print("get success")
+        return jsonify({'Success':'200'})
 
 if __name__ == '__main__':
     app.run( port=os.getenv("PORT", default=5000))
