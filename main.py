@@ -42,6 +42,18 @@ from nltk.corpus import wordnet as wn
 from youtube_transcript_api import YouTubeTranscriptApi
 import pandas as pd 
 
+def summarize(context):
+  full_text = context
+
+  model = Summarizer()
+  result = model(full_text, min_length=60, max_length=500, ratio=0.7)
+
+  summ_text = ''.join(result)
+  print(summ_text)
+  return summ_text
+  
+summarize("hey hello there")
+
 def mainModel(context):
   
   full_text = context
@@ -274,7 +286,8 @@ def summ():
         context=video_conetext(video_id)
         print(context)
         p_context=apply_te(context,lan='en')
-        return jsonify({'summary':p_context})
+        summarized=summarize(p_context)
+        return jsonify({'summary':summarized})
 
     
     if request.method=='GET':
