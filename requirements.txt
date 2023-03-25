@@ -127,7 +127,7 @@ spacy-loggers==1.0.4
 srsly==2.4.6
 stack-data==0.6.2
 sympy==1.11.1
-tensorflow
+tensorflow-cpu
 termcolor==2.2.0
 terminado==0.17.1
 thinc==8.1.9
