@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, render_template
-from flask_ngrok import run_with_ngrok
-from os import path
-import os
+#from flask_ngrok import run_with_ngrok
+#from os import path
 import json
 from flask_cors import CORS
 from urllib.parse import urlparse
@@ -26,7 +25,6 @@ import re
 import pke
 import string
 from nltk.corpus import stopwords
-#!pip freeze > requirement1.txt
 
 from nltk.tokenize import sent_tokenize
 import flashtext
@@ -45,7 +43,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import pandas as pd 
 
 def mainModel(context):
-  #f = open('D:\VS_Code\WebDev\ML\FlaskTemplate\pygar\soap.txt','r')
+  
   full_text = context
 
   model = Summarizer()
@@ -86,7 +84,7 @@ def mainModel(context):
   def tokenize_sent(text):
     sentences = [sent_tokenize(text)] ## sent_tokenize already ek list deta hai to yaha par 2d list ban ja rhi hai
     sentences = [y for x in sentences for y in x] 
-    sentences = [sentence.strip() for sentence in sentences if len(sentence) > 20]  ##remove sentences with length less than 20
+    sentences = [sentence.strip() for sentence in sentences if len(sentence) > 12]  ##remove sentences with length less than 20
     return sentences
 
   def get_keyword_sentences(keywords, sentences):
@@ -190,6 +188,8 @@ def mainModel(context):
     
 mainModel("Mahatma Gandhi, also known as Mohandas Karamchand Gandhi, was an Indian independence leader who played a significant role in India's struggle for freedom from British rule. He was born on October 2, 1869, in Porbandar, Gujarat, India. Gandhi was a lawyer by profession, but he is best known for his non-violent civil disobedience approach to achieving political and social change. He began his political activism in South Africa, where he fought against discriminatory laws against Indians. He later returned to India in 1915 and became the leader of the Indian National Congress, which was at the forefront of the independence movement. Gandhi's philosophy of non-violent resistance, known as Satyagraha, influenced many movements for civil rights and freedom around the world, including the American civil rights movement led by Martin Luther King Jr. He believed that non-violent protest could achieve social and political change without resorting to violence or aggression. Gandhi's most significant contribution to India's struggle for independence was the Salt March of 1930. The British had imposed a salt tax, making it illegal for Indians to produce or sell salt. Gandhi led a 240-mile march to the Arabian Sea to collect salt, which galvanized the Indian people and brought international attention to their cause. Gandhi's legacy continues to inspire people around the world. He believed in the power of the individual to bring about change, and his teachings on non-violence and civil disobedience continue to influence social and political movements to this day. He was assassinated on January 30, 1948, but his ideas and philosophy live on, and he remains one of the most revered and respected figures in modern history.")
 
+##########################PUNCHUATIONS####################
+
 import os
 import yaml
 import torch
@@ -228,66 +228,14 @@ def video_conetext(video_id):
     df = pd.json_normalize(data)
 
     df_final = df.text
-    df_final = ". ".join(df_final)
+    df_final = " ".join(df_final)
     result = re.sub(r'\[.+\]', '', df_final)
     return result
 
-##################################API#########################################
+##################################API##############################
 
 app = Flask(__name__)
 CORS(app)
-#run_with_ngrok(app) 
-# @app.route('/api',methods=['GET'])
-# def res_api():
-   
-#     return ("Get Success!")
-
-
-# @app.route('/api',methods=['GET','POST'])
-
-# def api():
-#     if request.method== 'GET':
-#         return ("Get Success")
-        
-#     if request.method=='POST':
-#         print( request.form.get('sa'))
-#         return jsonify({'output':0})   
-
-# if __name__ == "__main__":
-#     app.run()
-
-# @app.route("/api",methods=['POST','GET'])
-# def api():
-#     if request.method=='POST':
-#         print(request.form)
-#         return jsonify(request.form)
-
-#     if request.method=='GET':
-#         return "<p>Hello, World!</p>"
-
-# @app.route("/api",methods=['POST','GET'])
-# def api():
-#     if request.method=='POST':
-#         # input_json = request.get_json(force=True) 
-#         # print(input_json)
-#         url=request.form['url']
-#         print('IMPORTANT',request)
-#         parsed_url=urlparse(url)
-#         video_id=parse_qs(parsed_url.query)['v'][0]
-#         #print(video_id)
-#         context=video_conetext(video_id)
-#         #print(context)
-#         p_context=apply_te(context,lan='en')
-#         questions= mainModel(p_context)
-#         #return jsonify(request.form)
-#         return jsonify(questions)
-    
-#     if request.method=='GET':
-#         print("get success")
-#         return jsonify({'Success':'100'})
-
-# if __name__ == "__main__":
-#     app.run(host='127.0.0.1', port='8080')
 
 @app.route("/api",methods=['POST','GET'])
 
@@ -296,7 +244,7 @@ def api():
         input_json = request.get_json()
         print(request.content_type)
         print(input_json['url'])
-       # vurl=request.values.get('url')
+        #vurl=request.values.get('url')
         # print(vurl)
         # url=request.form['url']
         url=input_json['url']
@@ -306,6 +254,7 @@ def api():
         context=video_conetext(video_id)
         print(context)
         p_context=apply_te(context,lan='en')
+        print("\n",p_context)
         questions= mainModel(p_context)
         return jsonify(questions)
         #return jsonify({'Success':'100'})
@@ -316,4 +265,4 @@ def api():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=os.getenv("PORT", default=5000))
+    app.run( port=os.getenv("PORT", default=5000))
