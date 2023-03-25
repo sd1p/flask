@@ -10,16 +10,14 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import json
 import re
 import pandas as pd
-
+import requests
 
 import spacy
 import nltk
 nltk.download('stopwords')
 nltk.download('popular')
 from sorcery import dict_of
-from summarizer import Summarizer
 
-import pprint #pretty print
 import itertools
 import re
 import pke
@@ -42,26 +40,24 @@ from nltk.corpus import wordnet as wn
 from youtube_transcript_api import YouTubeTranscriptApi
 import pandas as pd 
 
-def summarize(context):
-  full_text = context
+def summarize(text):
+  payload={"inputs":text}
+  API_URL_sum = "https://api-inference.huggingface.co/models/gavin124/gpt2-finetuned-cnn-summarization-v2"
+  headers_sum = {"Authorization": "Bearer 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"}
+  response = requests.post(API_URL_sum, headers=headers_sum, json=payload)
+  output=response.json()[0]["summary_text"]
+  print(output)
+  return output
 
-  model = Summarizer()
-  result = model(full_text, min_length=60, max_length=500, ratio=0.7)
-
-  summ_text = ''.join(result)
-  print(summ_text)
-  return summ_text
   
-summarize("hey hello there")
+#summarize("hey hello there")
 
 def mainModel(context):
   
   full_text = context
 
-  model = Summarizer()
-  result = model(full_text, min_length=60, max_length=500, ratio=0.7)
 
-  summ_text = ''.join(result)
+  summ_text = summarize(full_text)
   print(summ_text)
 
 
@@ -309,6 +305,8 @@ def ques():
     if request.method=='GET':
         print("get success")
         return jsonify({'Success':'200'})
+
+
 
 if __name__ == '__main__':
     app.run( port=os.getenv("PORT", default=5000))
